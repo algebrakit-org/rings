@@ -10,8 +10,10 @@ pipeline {
 
         stage('Compile app') {
             /* build the JAR file */
-            steps {
-                sh 'mvn clean install -Dmaven.test.skip=true'
+            dir('Engine') {
+                steps {
+                    sh 'mvn clean install -Dmaven.test.skip=true'
+                }
             }
         }
     }
