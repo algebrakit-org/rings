@@ -1,0 +1,19 @@
+pipeline {
+    agent { docker 'maven:3-alpine' }
+    stages {
+        stage('Checkout repository') {
+            /* Let's make sure we have the repository cloned to our workspace */
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Compile app') {
+            /* build the JAR file */
+            steps {
+                sh 'mvn clean install -Dmaven.test.skip=true'
+            }
+        }
+    }
+}
+
