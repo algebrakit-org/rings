@@ -2487,7 +2487,7 @@ public final class MultivariateFactorization {
         main:
         while (true) {
             // choose next evaluation
-            HenselLifting.Evaluation<BigInteger> evaluation = (HenselLifting.Evaluation<BigInteger>) evaluations.next();
+            HenselLifting.Evaluation<BigInteger> evaluation = new HenselLifting.Evaluation<BigInteger>(poly.nVariables, new BigInteger[]{BigInteger.ZERO, BigInteger.ZERO, BigInteger.TWO}, poly.ring, poly.ordering);
 
             if (evaluation == null /*|| (nAttempts++ > N_FAILS_BEFORE_SWITCH_TO_EXTENSION && isSmallCardinality )*/) {
                 // <= not possible to reach this point

@@ -7,6 +7,7 @@ import cc.redberry.rings.Ring;
 import cc.redberry.rings.Rings;
 import cc.redberry.rings.bigint.BigInteger;
 import cc.redberry.rings.poly.IPolynomial;
+import cc.redberry.rings.poly.PolynomialFactorDecomposition;
 import cc.redberry.rings.poly.PolynomialMethods;
 import cc.redberry.rings.poly.multivar.HenselLifting.Evaluation;
 import cc.redberry.rings.poly.multivar.HenselLifting.IEvaluation;
@@ -34,6 +35,8 @@ import java.util.stream.StreamSupport;
 
 import static cc.redberry.rings.poly.multivar.MultivariateFactorizationTest.*;
 import static cc.redberry.rings.poly.multivar.MultivariatePolynomialZp64.parse;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @since 1.0
@@ -98,6 +101,12 @@ public class HenselLiftingTest extends AMultivariateTest {
         Assert.assertEquals(base, multiply(uFactors));
     }
 
+    @Test
+    public void test3() throws Exception {
+        String[] vars = {"a", "b", "c", "d"};
+        MultivariatePolynomial<BigInteger> poly = MultivariatePolynomial.parse("a + b + c + 5*a*d + 3*b*d + 4*c*d + 6*a*d^2 + 2*b*d^2 + 3*c*d^2", Rings.Z, vars);
+        PolynomialFactorDecomposition<MultivariatePolynomial<BigInteger>> factored = PolynomialMethods.Factor(poly);
+    }
 
     @Test
     public void testEvaluation1() throws Exception {
