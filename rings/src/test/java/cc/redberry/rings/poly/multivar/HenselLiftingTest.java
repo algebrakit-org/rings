@@ -21,10 +21,14 @@ import cc.redberry.rings.test.AbstractTest;
 import cc.redberry.rings.test.Benchmark;
 import cc.redberry.rings.util.ArraysUtil;
 import cc.redberry.rings.util.TimeUnits;
+import org.apache.commons.math3.random.AbstractRandomGenerator;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 
 import java.util.Arrays;
 import java.util.Spliterator;
@@ -33,10 +37,11 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
+import static cc.redberry.rings.poly.multivar.MultivariateFactorization.factorPrimitiveInZ0;
+import static cc.redberry.rings.poly.multivar.MultivariateFactorization.orderByDegrees;
 import static cc.redberry.rings.poly.multivar.MultivariateFactorizationTest.*;
 import static cc.redberry.rings.poly.multivar.MultivariatePolynomialZp64.parse;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mockStatic;
 
 /**
  * @since 1.0
@@ -103,9 +108,24 @@ public class HenselLiftingTest extends AMultivariateTest {
 
     @Test
     public void test3() throws Exception {
-        String[] vars = {"a", "b", "c", "d"};
-        MultivariatePolynomial<BigInteger> poly = MultivariatePolynomial.parse("a + b + c + 5*a*d + 3*b*d + 4*c*d + 6*a*d^2 + 2*b*d^2 + 3*c*d^2", Rings.Z, vars);
-        PolynomialFactorDecomposition<MultivariatePolynomial<BigInteger>> factored = PolynomialMethods.Factor(poly);
+        try (MockedStatic<PrivateRandom> mockedRandom = mockStatic(PrivateRandom.class)) {
+            mockedRandom.when(PrivateRandom::getRandom).thenReturn(new JDKRandomGenerator() {
+                final int[] numbers = new int[]{0, 0, 2};
+                int index = -1;
+
+                @Override
+                public int nextInt(int i) {
+                    index++;
+                    return numbers[index % numbers.length];
+                }
+            });
+            String[] vars = {"a", "b", "c", "d"};
+            MultivariatePolynomial<BigInteger> poly = MultivariatePolynomial.parse("a + b + c + 5*a*d + 3*b*d + 4*c*d + 6*a*d^2 + 2*b*d^2 + 3*c*d^2", Rings.Z, vars);
+            MultivariateFactorization.OrderByDegrees<Monomial<BigInteger>, MultivariatePolynomial<BigInteger>> input = orderByDegrees(poly, true, true, -1);
+            // factorPrimitiveInZ0 uses HenselLifting.
+            // Factoring this polynomial with [0, 0, 2] as the first evaluation throws an NPE (or assertion error that lcRest should not be null).
+            factorPrimitiveInZ0(input.ordered);
+        }
     }
 
     @Test
